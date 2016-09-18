@@ -1,0 +1,5 @@
+buildbot==0.9.0rc3
+buildbot-www
+buildbot-waterfall-view
+buildbot-console-view
+prometheus_client
