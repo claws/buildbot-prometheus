@@ -33,22 +33,23 @@ from buildbot.util import service
 from buildbot.process.results import (
     CANCELLED, EXCEPTION, FAILURE, RETRY, SKIPPED, SUCCESS, WARNINGS)
 
-from prometheus_client import Counter, Gauge
+from prometheus_client import Counter, Gauge, Histogram
 from prometheus_client import CollectorRegistry
 from prometheus_client.twisted import MetricsResource
 
 
-BuildStatusMap = {SUCCESS: 'success',
-                  WARNINGS: 'success',
-                  FAILURE: 'failure',
-                  SKIPPED: 'success',
-                  EXCEPTION: 'error',
-                  RETRY: 'pending',
-                  CANCELLED: 'error'}
+ResultsStatusMap = {SUCCESS: 'success',
+                    WARNINGS: 'success',
+                    FAILURE: 'failure',
+                    SKIPPED: 'success',
+                    EXCEPTION: 'error',
+                    RETRY: 'pending',
+                    CANCELLED: 'error'}
 
 
-def resolve_build_status(state):
-    return BuildStatusMap.get(state, 'error')
+def resolve_results_status(state):
+    ''' Resolve the results status to one of success, failure or error '''
+    return ResultsStatusMap.get(state, 'error')
 
 
 class Prometheus(service.BuildbotService):
@@ -68,10 +69,10 @@ class Prometheus(service.BuildbotService):
     '''
 
     name = "Prometheus"
+    namespace = 'buildbot'
 
     def __init__(self, port=9101, **kwargs):
         service.BuildbotService.__init__(self, **kwargs)
-        log.msg("initialising Prometheus")
         self.port = port
         self.server = None
         self.consumers = []
@@ -112,118 +113,138 @@ class Prometheus(service.BuildbotService):
 
         # build metrics
         builds_labels = ['builder_id', 'worker_id']
+        self.g_builds_duration = Gauge(
+            'builds_duration_seconds',
+            'Number of seconds spent performing builds',
+            labelnames=builds_labels,
+            namespace=self.namespace,
+            registry=self.registry)
         self.c_builds_success = Counter(
-            'buildbot_builds_success',
+            'builds_success',
             'Number of builds reporting success',
-            builds_labels,
+            labelnames=builds_labels,
+            namespace=self.namespace,
             registry=self.registry)
         self.c_builds_failure = Counter(
-            'buildbot_builds_failure',
+            'builds_failure',
             'Number of builds reporting failure',
-            builds_labels,
+            labelnames=builds_labels,
+            namespace=self.namespace,
             registry=self.registry)
         self.c_builds_error = Counter(
-            'buildbot_builds_error',
+            'builds_error',
             'Number of builds reporting error',
-            builds_labels,
-            registry=self.registry)
-        self.g_builds_duration = Gauge(
-            'buildbot_builds_duration_seconds',
-            'Number of seconds spent performing builds',
-            builds_labels,
+            labelnames=builds_labels,
+            namespace=self.namespace,
             registry=self.registry)
 
         # builders metrics
         builders_labels = ['builder_id', 'builder_name']
         self.g_builders_running_total = Gauge(
-            'buildbot_builders_running_total',
+            'builders_running_total',
             'Total number of builders running',
+            namespace=self.namespace,
             registry=self.registry)
         self.g_builders_running = Gauge(
-            'buildbot_builders_running',
+            'builders_running',
             'Number of builders running',
-            builders_labels,
+            labelnames=builders_labels,
+            namespace=self.namespace,
             registry=self.registry)
 
         # buildsets metrics
         buildsets_labels = ['buildset_id']
+        self.g_buildsets_duration = Gauge(
+            'buildsets_duration_seconds',
+            'Number of seconds spent performing buildsets',
+            labelnames=buildsets_labels,
+            namespace=self.namespace,
+            registry=self.registry)
         self.c_buildsets_success = Counter(
-            'buildbot_buildsets_success',
+            'buildsets_success',
             'Number of buildsets reporting success',
-            buildsets_labels,
+            labelnames=buildsets_labels,
+            namespace=self.namespace,
             registry=self.registry)
         self.c_buildsets_failure = Counter(
-            'buildbot_buildsets_failure',
+            'buildsets_failure',
             'Number of buildsets reporting failure',
-            buildsets_labels,
+            labelnames=buildsets_labels,
+            namespace=self.namespace,
             registry=self.registry)
         self.c_buildsets_error = Counter(
-            'buildbot_buildsets_error',
+            'buildsets_error',
             'Number of buildsets reporting error',
-            buildsets_labels,
-            registry=self.registry)
-        self.g_buildsets_duration = Gauge(
-            'buildbot_buildsets_duration_seconds',
-            'Number of seconds spent performing buildsets',
-            buildsets_labels,
+            labelnames=buildsets_labels,
+            namespace=self.namespace,
             registry=self.registry)
 
         # build requests metrics
         build_requests_labels = ['builder_id']
         self.g_build_requests_duration = Gauge(
-            'buildbot_build_requests_duration_seconds',
+            'build_requests_duration_seconds',
             'Number of seconds spent performing build requests',
-            build_requests_labels,
+            labelnames=build_requests_labels,
+            namespace=self.namespace,
             registry=self.registry)
         self.c_build_requests_success = Counter(
-            'buildbot_build_requests_success',
+            'build_requests_success',
             'Number of build requests reporting success',
-            build_requests_labels,
+            labelnames=build_requests_labels,
+            namespace=self.namespace,
             registry=self.registry)
         self.c_build_requests_failure = Counter(
-            'buildbot_build_requests_failure',
+            'build_requests_failure',
             'Number of build requests reporting failure',
-            build_requests_labels,
+            labelnames=build_requests_labels,
+            namespace=self.namespace,
             registry=self.registry)
         self.c_build_requests_error = Counter(
-            'buildbot_build_requests_error',
+            'build_requests_error',
             'Number of build requests reporting error',
-            build_requests_labels,
+            labelnames=build_requests_labels,
+            namespace=self.namespace,
             registry=self.registry)
 
         # steps metrics
         steps_labels = ['step_number', 'step_name', 'builder_id', 'worker_id']
         self.g_steps_duration = Gauge(
-            'buildbot_steps_duration_seconds',
+            'steps_duration_seconds',
             'Number of seconds spent performing build steps',
-            steps_labels,
+            labelnames=steps_labels,
+            namespace=self.namespace,
             registry=self.registry)
         self.c_steps_success = Counter(
-            'buildbot_steps_success',
+            'steps_success',
             'Number of steps reporting success',
-            steps_labels,
+            labelnames=steps_labels,
+            namespace=self.namespace,
             registry=self.registry)
         self.c_steps_failure = Counter(
-            'buildbot_steps_failure',
+            'steps_failure',
             'Number of steps reporting failure',
-            steps_labels,
+            labelnames=steps_labels,
+            namespace=self.namespace,
             registry=self.registry)
         self.c_steps_error = Counter(
-            'buildbot_steps_error',
+            'steps_error',
             'Number of steps reporting error',
-            steps_labels,
+            labelnames=steps_labels,
+            namespace=self.namespace,
             registry=self.registry)
 
         # workers metrics
         workers_labels = ['worker_id', 'worker_name']
         self.g_workers_running_total = Gauge(
-            'buildbot_workers_running_total',
+            'workers_running_total',
             'Total number of workers running',
+            namespace=self.namespace,
             registry=self.registry)
         self.g_workers_running = Gauge(
-            'buildbot_workers_running',
+            'workers_running',
             'Number of workers running',
-            workers_labels,
+            labelnames=workers_labels,
+            namespace=self.namespace,
             registry=self.registry)
 
     @defer.inlineCallbacks
@@ -249,15 +270,31 @@ class Prometheus(service.BuildbotService):
             yield consumer.stopConsuming()
         self.consumers = []
 
-    @defer.inlineCallbacks
+    # @defer.inlineCallbacks
     def buildsConsumer(self, key, msg):
         '''
+        This method is responsible for updating build related metrics. There
+        are four build set metrics:
+
+        - buildbot_builds_duration_seconds,
+        - buildbot_builds_success,
+        - buildbot_builds_failure,
+        - buildbot_builds_error
+
+        buildbot_builds_duration_seconds is a gauge metric used to
+        track the duration of individual builds by making use of Prometheus
+        multi dimensional labels. As builds complete, an instance of this
+        metric is created by passing builder_id and worker_id labels and
+        then setting the value. This allows visualisation tools to query and
+        filter metrics for specific builder combinations.
+
+        Similarly, the other counter metrics record success, failure and
+        error states for each build.
         '''
         action = key[2]
         labels = dict(builder_id=msg['builderid'],
                       worker_id=msg['workerid'])
-        build_info = yield self.master.data.get(("builds", msg['buildid']))
-        log.msg("buildSetsConsumer: build_info:{}".format(build_info))
+        # build_info = yield self.master.data.get(("builds", msg['buildid']))
 
         if action == 'finished':
 
@@ -268,7 +305,7 @@ class Prometheus(service.BuildbotService):
             duration_seconds = build_duration.total_seconds()
             self.g_builds_duration.labels(labels).set(duration_seconds)
 
-            build_status = resolve_build_status(msg['results'])
+            build_status = resolve_results_status(msg['results'])
             if build_status == 'success':
                 self.c_builds_success.labels(labels).inc()
             elif build_status == 'failure':
@@ -367,7 +404,7 @@ class Prometheus(service.BuildbotService):
             duration_seconds = buildset_duration.total_seconds()
             self.g_buildsets_duration.labels(labels).set(duration_seconds)
 
-            bs_success = resolve_build_status(msg['results'])
+            bs_success = resolve_results_status(msg['results'])
             if bs_success == 'success':
                 self.c_buildsets_success.labels(labels).inc()
             elif bs_success == 'failure':
@@ -410,7 +447,7 @@ class Prometheus(service.BuildbotService):
             duration_seconds = br_duration.total_seconds()
             self.g_build_requests_duration.labels(labels).set(duration_seconds)
 
-            br_success = resolve_build_status(msg['results'])
+            br_success = resolve_results_status(msg['results'])
             if br_success == 'success':
                 self.c_build_requests_success.labels(labels).inc()
             elif br_success == 'failure':
@@ -457,7 +494,7 @@ class Prometheus(service.BuildbotService):
             duration_seconds = step_duration.total_seconds()
             self.g_steps_duration.labels(labels).set(duration_seconds)
 
-            step_success = resolve_build_status(msg['results'])
+            step_success = resolve_results_status(msg['results'])
             if step_success == 'success':
                 self.c_steps_success.labels(labels).inc()
             elif step_success == 'failure':

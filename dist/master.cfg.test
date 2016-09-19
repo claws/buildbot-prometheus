@@ -2,7 +2,6 @@
 # ex: set filetype=python:
 
 from buildbot.plugins import *
-from buildbot_prometheus import Prometheus
 
 # This is a sample buildmaster config file. It must be installed as
 # 'master.cfg' in your buildmaster's base directory.
@@ -105,7 +104,7 @@ c['db'] = {
 }
 
 c['services'] = []
-c['services'].append(Prometheus(port=9100))
+c['services'].append(reporters.Prometheus(port=9100))
 
 c['buildbotNetUsageData'] = None
 

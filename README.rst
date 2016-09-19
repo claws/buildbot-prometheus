@@ -4,7 +4,8 @@ Buildbot Prometheus Exporter
 ``buildbot-prometheus`` is a Python package that provides a Prometheus
 metrics exporter for buildbot.
 
-This package is build for Buildbot version 0.9.
+This package is built for Buildbot version 0.9 and installs as a *reporters*
+Buildbot plugin.
 
 
 Installation
@@ -14,17 +15,19 @@ Installation
 
     $ pip install buildbot_prometheus
 
-Then add the following to your buildbot ``master.cfg`` file and
-restart the master.
+The ``setup.py`` file includes an *entry_points* directive that configures
+it as a Buildbot *reporters* plugin which simplifies its use in the Buildbot
+configuration file.
+
+To use the Prometheus reporter plugin add the following to your buildbot
+``master.cfg`` file and (re)start the master.
 
 .. code-block:: python
 
-    from buildbot_prometheus import Prometheus
-    c['services'].append(Prometheus(port=9101))
+    c['services'].append(reporters.Prometheus(port=9101))
 
-The buildbot master should now be exposing metrics to Prometheus. An example
-of the metrics provided by the Buildbot exporter is shown below by using
-curl to fetch the metrics:
+The buildbot master should now be exposing metrics to Prometheus. You can
+check it using *curl* to fetch the metrics such as in the example below:
 
 .. code-block:: console
 
@@ -60,9 +63,8 @@ with metrics from this exporter. Prometheus will also automatically associate
 an ``instance`` label (e.g. 'localhost:9101') too.
 
 All metrics exposed by this exporter are prefixed with the ``buildbot_``
-string as a namespace strategy to isolate them from other Prometheus exporters
-which makes them easier to find in metrics consumer and visualisation tools
+string as a namespace strategy to isolate them from other Prometheus exporters.
+This makes them easier to find in metrics consumer and visualisation tools
 such as Grafana.
 
 All duration metrics use seconds as the unit of measure.
-

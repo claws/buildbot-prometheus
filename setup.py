@@ -12,7 +12,7 @@ requires = [str(ir.req) for ir in install_reqs]
 
 
 def read_version():
-    regexp = re.compile(r"^__version__\W*=\W*['\"](\d\d\.\d\d\.\d+)['\"]")
+    regexp = re.compile(r"^__version__\W*=\W*['\"](\d\d\.\d+.\d+)['\"]")
     init_file = os.path.join(
         os.path.dirname(__file__), 'buildbot_prometheus', '__init__.py')
     with open(init_file) as f:
@@ -41,6 +41,8 @@ if __name__ == "__main__":
         url="https://github.com/claws/buildbot-prometheus",
         packages=["buildbot_prometheus"],
         install_requires=requires,
+        entry_points = {
+            'buildbot.reporters': 'Prometheus = buildbot_prometheus:Prometheus'},
         classifiers=[
             "Development Status :: 4 - Beta",
             "Intended Audience :: Developers",
