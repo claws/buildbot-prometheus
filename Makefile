@@ -1,7 +1,6 @@
 # This makefile has been created to help developers perform common actions.
 # It assumes it is operating in an environment, such as a virtual env,
-# where the python command links to Python2.7 executable - because buildbot
-# is currently restricted to Python2.7 due to twisted.spread.
+# where the python command links to an appropriate Python.
 
 # help: help                           - display this makefile's help information
 help:
@@ -11,24 +10,21 @@ help:
 clean:
 	@git clean -X -f -d
 
-
 # help: clean.scrub                    - clean all files, even untracked files
 clean.scrub:
 	git clean -x -f -d
 
 # help: dist                           - create a source distribution package
 dist: clean
-	@python setup.py sdist
-
+	@python setup.py bdist_wheel
 
 # help: dist.test                      - test a source distribution package
 dist.test: dist
-	@cd dist && ./test.bash ./buildbot_prometheus-*.tar.gz
-
+	@cd tests && ./test.bash ../dist/buildbot_prometheus-*-none-any.whl
 
 # help: dist.upload                    - upload a source distribution package
-dist.upload: clean
-	@python setup.py sdist upload
+dist.upload:
+	@twine upload ./dist/buildbot_prometheus-*-none-any.whl
 
 # Keep these lines at the end of the file to retain nice help
 # output formatting.

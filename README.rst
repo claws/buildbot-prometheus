@@ -1,11 +1,9 @@
 Buildbot Prometheus Exporter
 ============================
 
-``buildbot-prometheus`` is a Python package that provides a Prometheus
-metrics exporter for buildbot.
-
-This package is built for Buildbot version 0.9 and installs as a *reporters*
-Buildbot plugin.
+``buildbot-prometheus`` is a Python package providing a Prometheus metrics
+exporter for a buildbot master. The package should work on Python 2 and
+Python 3.
 
 
 Installation
@@ -27,7 +25,7 @@ To use the Prometheus reporter plugin add the following to your buildbot
     c['services'].append(reporters.Prometheus(port=9101))
 
 The buildbot master should now be exposing metrics to Prometheus. You can
-check it using *curl* to fetch the metrics such as in the example below:
+check the metrics service using the simple command line tool *curl*:
 
 .. code-block:: console
 
