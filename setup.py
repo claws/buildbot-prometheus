@@ -24,6 +24,7 @@ def read_version():
             raise RuntimeError(
                 'Cannot find __version__ in buildbot_prometheus/__init__.py')
 
+
 version = read_version()
 
 

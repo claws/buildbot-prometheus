@@ -1,4 +1,3 @@
-recursive-include License *
-recursive-include buildbot_prometheus *.py
+include License
 include requirements.txt
 include Makefile

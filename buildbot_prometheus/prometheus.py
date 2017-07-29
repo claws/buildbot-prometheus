@@ -90,7 +90,7 @@ class Prometheus(service.BuildbotService):
 
     @defer.inlineCallbacks
     def startService(self):
-        log.msg("starting Prometheus reporter")
+        log.msg("Starting Prometheus reporter")
         yield service.BuildbotService.startService(self)
         root = Resource()
         root.putChild(b'metrics', MetricsResource(registry=self.registry))
@@ -99,7 +99,7 @@ class Prometheus(service.BuildbotService):
 
     @defer.inlineCallbacks
     def stopService(self):
-        log.msg("stopping Prometheus reporter")
+        log.msg("Stopping Prometheus reporter")
         yield self.server.stopListening()
         yield service.BuildbotService.stopService(self)
         self.removeConsumers()
@@ -108,7 +108,7 @@ class Prometheus(service.BuildbotService):
         '''
         Create the Prometheus metrics that will be exposed.
         '''
-        log.msg("creating Prometheus metrics")
+        log.msg("Creating Prometheus metrics")
         self.registry = CollectorRegistry()
 
         # build metrics
