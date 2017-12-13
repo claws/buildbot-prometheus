@@ -303,15 +303,15 @@ class Prometheus(service.BuildbotService):
             build_finished = msg['complete_at']
             build_duration = build_finished - build_started
             duration_seconds = build_duration.total_seconds()
-            self.g_builds_duration.labels(labels).set(duration_seconds)
+            self.g_builds_duration.labels(**labels).set(duration_seconds)
 
             build_status = resolve_results_status(msg['results'])
             if build_status == 'success':
-                self.c_builds_success.labels(labels).inc()
+                self.c_builds_success.labels(**labels).inc()
             elif build_status == 'failure':
-                self.c_builds_failure.labels(labels).inc()
+                self.c_builds_failure.labels(**labels).inc()
             elif build_status == 'error':
-                self.c_builds_error.labels(labels).inc()
+                self.c_builds_error.labels(**labels).inc()
 
     def buildersConsumer(self, key, msg):
         '''
@@ -350,10 +350,10 @@ class Prometheus(service.BuildbotService):
 
         if action == 'started':
             self.g_builders_running_total.inc()
-            self.g_builders_running.labels(labels).inc()
+            self.g_builders_running.labels(**labels).inc()
         elif action == 'stopped':
             self.g_builders_running_total.dec()
-            self.g_builders_running.labels(labels).dec()
+            self.g_builders_running.labels(**labels).dec()
 
     # @defer.inlineCallbacks
     def buildSetsConsumer(self, key, msg):
@@ -402,15 +402,15 @@ class Prometheus(service.BuildbotService):
             buildset_finished = msg['complete_at']
             buildset_duration = buildset_finished - buildset_started
             duration_seconds = buildset_duration.total_seconds()
-            self.g_buildsets_duration.labels(labels).set(duration_seconds)
+            self.g_buildsets_duration.labels(**labels).set(duration_seconds)
 
             bs_success = resolve_results_status(msg['results'])
             if bs_success == 'success':
-                self.c_buildsets_success.labels(labels).inc()
+                self.c_buildsets_success.labels(**labels).inc()
             elif bs_success == 'failure':
-                self.c_buildsets_failure.labels(labels).inc()
+                self.c_buildsets_failure.labels(**labels).inc()
             elif bs_success == 'error':
-                self.c_buildsets_error.labels(labels).inc()
+                self.c_buildsets_error.labels(**labels).inc()
 
     def buildRequestsConsumer(self, key, msg):
         '''
@@ -445,15 +445,15 @@ class Prometheus(service.BuildbotService):
             br_finished = msg['complete_at']
             br_duration = br_finished - br_started
             duration_seconds = br_duration.total_seconds()
-            self.g_build_requests_duration.labels(labels).set(duration_seconds)
+            self.g_build_requests_duration.labels(**labels).set(duration_seconds)
 
             br_success = resolve_results_status(msg['results'])
             if br_success == 'success':
-                self.c_build_requests_success.labels(labels).inc()
+                self.c_build_requests_success.labels(**labels).inc()
             elif br_success == 'failure':
-                self.c_build_requests_failure.labels(labels).inc()
+                self.c_build_requests_failure.labels(**labels).inc()
             elif br_success == 'error':
-                self.c_build_requests_error.labels(labels).inc()
+                self.c_build_requests_error.labels(**labels).inc()
 
     @defer.inlineCallbacks
     def stepsConsumer(self, key, msg):
@@ -492,15 +492,15 @@ class Prometheus(service.BuildbotService):
             step_finished = msg['complete_at']
             step_duration = step_finished - step_started
             duration_seconds = step_duration.total_seconds()
-            self.g_steps_duration.labels(labels).set(duration_seconds)
+            self.g_steps_duration.labels(**labels).set(duration_seconds)
 
             step_success = resolve_results_status(msg['results'])
             if step_success == 'success':
-                self.c_steps_success.labels(labels).inc()
+                self.c_steps_success.labels(**labels).inc()
             elif step_success == 'failure':
-                self.c_steps_failure.labels(labels).inc()
+                self.c_steps_failure.labels(**labels).inc()
             elif step_success == 'error':
-                self.c_steps_error.labels(labels).inc()
+                self.c_steps_error.labels(**labels).inc()
 
     def workersConsumer(self, key, msg):
         '''
@@ -528,7 +528,7 @@ class Prometheus(service.BuildbotService):
 
         if action == 'connected':
             self.g_workers_running_total.inc()
-            self.g_workers_running.labels(labels).inc()
+            self.g_workers_running.labels(**labels).inc()
         elif action == 'disconnected':
             self.g_workers_running_total.dec()
-            self.g_workers_running.labels(labels).dec()
+            self.g_workers_running.labels(**labels).dec()
