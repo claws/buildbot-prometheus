@@ -302,7 +302,7 @@ class Prometheus(service.BuildbotService):
             build_started = msg['started_at']
             build_finished = msg['complete_at']
             build_duration = build_finished - build_started
-            duration_seconds = build_duration.total_seconds()
+            duration_seconds = build_duration
             self.g_builds_duration.labels(**labels).set(duration_seconds)
 
             build_status = resolve_results_status(msg['results'])
@@ -401,7 +401,7 @@ class Prometheus(service.BuildbotService):
             buildset_started = msg['submitted_at']
             buildset_finished = msg['complete_at']
             buildset_duration = buildset_finished - buildset_started
-            duration_seconds = buildset_duration.total_seconds()
+            duration_seconds = buildset_duration
             self.g_buildsets_duration.labels(**labels).set(duration_seconds)
 
             bs_success = resolve_results_status(msg['results'])
@@ -444,7 +444,7 @@ class Prometheus(service.BuildbotService):
             br_started = msg['submitted_at']
             br_finished = msg['complete_at']
             br_duration = br_finished - br_started
-            duration_seconds = br_duration.total_seconds()
+            duration_seconds = br_duration
             self.g_build_requests_duration.labels(**labels).set(duration_seconds)
 
             br_success = resolve_results_status(msg['results'])
@@ -491,7 +491,7 @@ class Prometheus(service.BuildbotService):
             step_started = msg['started_at']
             step_finished = msg['complete_at']
             step_duration = step_finished - step_started
-            duration_seconds = step_duration.total_seconds()
+            duration_seconds = step_duration
             self.g_steps_duration.labels(**labels).set(duration_seconds)
 
             step_success = resolve_results_status(msg['results'])
