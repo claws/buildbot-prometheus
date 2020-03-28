@@ -71,9 +71,10 @@ class Prometheus(service.BuildbotService):
     name = "Prometheus"
     namespace = 'buildbot'
 
-    def __init__(self, port=9101, **kwargs):
+    def __init__(self, port=9101, interface='', **kwargs):
         service.BuildbotService.__init__(self, **kwargs)
         self.port = port
+        self.interface = interface
         self.server = None
         self.consumers = []
         self.registry = None
@@ -94,7 +95,7 @@ class Prometheus(service.BuildbotService):
         yield service.BuildbotService.startService(self)
         root = Resource()
         root.putChild(b'metrics', MetricsResource(registry=self.registry))
-        self.server = reactor.listenTCP(self.port, Site(root))
+        self.server = reactor.listenTCP(self.port, Site(root), interface=self.interface)
         log.msg("Prometheus service starting on {}".format(self.server.port))
 
     @defer.inlineCallbacks
