@@ -1,4 +1,4 @@
 
 from .prometheus import Prometheus
 
-__version__ = '17.7.2'
+__version__ = '20.4.0'
