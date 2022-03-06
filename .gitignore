@@ -90,3 +90,8 @@ ENV/
 
 tests/bbpvenv
 
+# VSCode files
+.vscode/
+
+# buildbot directory created by tests
+tests/master
