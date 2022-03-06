@@ -2,17 +2,18 @@
 #
 # Perform a crude check on the generated distribution artefact.
 # Creates a virtual environment, installs buildbot_prometheus,
-# creates a master and starts it, checks the Prometheus service,
-# then finally stop the master and remove the temporary artefacts.
+# creates a buildbot master and starts it, checks the Prometheus
+# service, then finally stops the master and removes the temporary
+# artefacts.
 #
 # Example:
-#    $ ./test.bash ../dist/buildbot_prometheus-17.7.1-py2.py3-none-any.whl
+#    $ ./test.bash ../dist/buildbot_prometheus-22.0.0--py3-none-any.whl
 #
 
-PYTHON_TARGET="3"  # valid options are "3" or 2"
+PYTHON_TARGET="3.9"
 
 if [ -z "$1" ]; then
-  echo "usage: $0 buildbot_prometheus-YY.MM.MICRO-py2.py3-none-any.whl"
+  echo "usage: $0 buildbot_prometheus-YY.MM.MICRO-py3-none-any.whl"
   exit
 fi
 
@@ -24,17 +25,15 @@ echo "Removing any old artefacts"
 rm -rf bbpvenv
 
 echo "Creating test virtual environment using Python $PYTHON_TARGET"
-if [ $PYTHON_TARGET == "3" ]; then
-    python3 -m venv bbpvenv
-else
-    python2.7 -m virtualenv bbpvenv
-fi
+python$PYTHON_TARGET -m venv venv --prompt bbpvenv
 
 echo "Entering test virtual environment"
-source bbpvenv/bin/activate
+source venv/bin/activate
 
 echo "Upgrading pip"
 pip install pip --upgrade
+# install wheel package to simplify third party package installation
+pip install wheel
 
 # Install the bundle to get the web components.
 echo "Installing buildbot[bundle]"
@@ -48,19 +47,29 @@ buildbot create-master master
 rm -f master/master.cfg.sample
 cp master.cfg.test master/master.cfg
 buildbot start master
-sleep 2
 
-echo "Checking buildbot Prometheus service"
-curl -s localhost:9100/metrics | grep -v "#" | sort
+if [ $? -eq 0 ]; then
+  sleep 2
 
-echo "Stopping a buildbot master"
-buildbot stop master
+  echo "Checking buildbot Prometheus service"
+  curl -s localhost:9100/metrics | grep -v "#" | sort
 
+  echo "Stopping a buildbot master"
+  buildbot stop master
+else
+  echo "Error starting buildbot master"
+  echo ""
+  echo "Printing 'master/twistd.log' which might explain why..."
+  cat master/twistd.log
+  echo ""
+fi
+
+sleep 1
+echo "Removing the buildbot master directory"
 rm -rf master
 
 echo "Exiting test virtual environment"
 deactivate
 
 echo "Removing test virtual environment"
-rm -rf bbpvenv
-
+rm -rf venv

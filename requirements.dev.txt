@@ -1,3 +1,7 @@
+black
+isort[requirements_deprecated_finder]
 twine
 wheel
+
+# Used when performing integration test
 buildbot[bundle]
